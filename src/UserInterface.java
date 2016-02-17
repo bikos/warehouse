@@ -1,9 +1,7 @@
-package src;
+
 import java.util.*;
 import java.text.*;
 import java.io.*;
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 
 public class UserInterface {
 
@@ -14,18 +12,15 @@ public class UserInterface {
     private static final int ADD_CLIENT = 1;
     private static final int ADD_PRODUCT = 2;
     private static final int PROCESS_ORDER = 3;
-    private static final int RETURN_PRODUCTS = 4;
-    private static final int RENEW_PRODUCTS = 5;
-    private static final int REMOVE_PRODUCTS = 6;
-    private static final int PLACE_HOLD = 7;
-    private static final int REMOVE_HOLD = 8;
-    private static final int PROCESS_HOLD = 9;
-    private static final int GET_TRANSACTIONS = 10;
-    private static final int SHOW_CLIENTS = 11;
-    private static final int SHOW_PRODUCTS = 12;
-    private static final int SAVE = 13;
-    private static final int RETRIEVE = 14;
-    private static final int HELP = 15;
+    private static final int RECEIVE_SHIPMENT = 4;
+    private static final int GET_TRANSACTIONS = 5;
+    private static final int SHOW_CLIENTS = 6;
+    private static final int SHOW_PRODUCTS = 7;
+    private static final int SAVE = 8;
+    private static final int SHOW_INVOICES = 9;
+    private static final int SHOW_WAITLIST = 10;
+    private static final int RECIEVE_PAYMENT = 11;
+    private static final int HELP = 12;
 
     private UserInterface() {
         if (yesOrNo("Look for saved data and  use it?")) {
@@ -110,18 +105,15 @@ public class UserInterface {
         System.out.println(EXIT + " to Exit\n");
         System.out.println(ADD_CLIENT + " to add a client");
         System.out.println(ADD_PRODUCT + " to  add products");
-        System.out.println(PROCESS_ORDER + " to  issue products to a  client");
-        System.out.println(RETURN_PRODUCTS + " to  return products ");
-        System.out.println(RENEW_PRODUCTS + " to  renew products ");
-        System.out.println(REMOVE_PRODUCTS + " to  remove products");
-        System.out.println(PLACE_HOLD + " to  place a hold on a product");
-        System.out.println(REMOVE_HOLD + " to  remove a hold on a product");
-        System.out.println(PROCESS_HOLD + " to  process holds");
+        System.out.println(PROCESS_ORDER + " to  process order of client");
+        System.out.println(RECEIVE_SHIPMENT + " to  receive products shipment");
         System.out.println(GET_TRANSACTIONS + " to  print transactions");
         System.out.println(SHOW_CLIENTS + " to  print clients");
         System.out.println(SHOW_PRODUCTS + " to  print products");
         System.out.println(SAVE + " to  save data");
-        System.out.println(RETRIEVE + " to  retrieve");
+        System.out.println(SHOW_INVOICES + " to view invoices");
+        System.out.println(SHOW_WAITLIST + " to view items in waitList");
+        System.out.println(RECIEVE_PAYMENT + " to make the payment");
         System.out.println(HELP + " for help");
     }
 
@@ -140,11 +132,14 @@ public class UserInterface {
     public void addProducts() {
         Product result;
         do {
-            String title = getToken("Enter  title");
-            String productID = getToken("Enter id");
-            String author = getToken("Enter author");
-            result = warehouse.addProduct(title, author, productID);
-            if (result != null) {
+            //String name, String manufacturer, String id, BigDecimal price
+            String name = getToken("Enter Product Name");
+            String productID = getToken("Enter Product ID");
+            String manufacturer = getToken("Enter Manufacturer");
+            Double price = Double.parseDouble(getToken("Enter Price"));
+            Integer quantity = Integer.parseInt(getToken("Enter the Quantity"));
+            result = warehouse.addProduct(name, manufacturer, productID, price, quantity);
+            if (result != null && quantity > 0) {
                 System.out.println(result);
             } else {
                 System.out.println("Product could not be added");
@@ -157,31 +152,25 @@ public class UserInterface {
 
     public void issueProducts() {
 
+        // ask user ID, call warehouse.testclient to see if it exists, if true, proceeed
+        // to issueProduct at Warehouse class
         String clientID = getToken("Enter User ID");
         Client client = warehouse.testClient(clientID);
-        if (client != null) {
-//            System.out.println("Use exist");
+        if (client == null) {
+            System.out.println("No such member");
+            return;
+        } else {
 
-            // check out multiple product for the user
             do {
+
+                // do while loop here to ask for books. 
                 String productID = getToken("Enter Product ID");
-                Product product = warehouse.testProduct(productID);
-                if (product != null) {
-                    if(product.borrower==null){   
-                    Calendar date = Calendar.getInstance();
-                    //setting the due date
-                    date.setTime(new Date());
-                    date.add(Calendar.DATE, 30);
-                    System.out.println("PRODUCT " + product.getTitle() + " has been issued to " + client.getName());
-                    product.Borrower(client, date.getTime());
-                    System.out.println("The due date to return this product is " + date.getTime());
-                    warehouse.insertTransaction(client, product, date.getTime());
-                }
-                    else{
-                    System.out.println(" Issue denied, product already issued to "+ product.borrower.getName()+". Product will return on " +product.dueDate);
+                if (warehouse.testProduct(productID) != null) {
+                    Integer quantity = Integer.parseInt(getToken("Enter the Quantity"));
+                    if (warehouse.issueProduct(client, productID, quantity)) {
+
                     }
-                
-                
+
                 } else {
                     System.out.println("Product does not exist");
                 }
@@ -191,9 +180,39 @@ public class UserInterface {
                 }
             } while (true);
 
-        } else {
-            System.out.println("client does not exist");
         }
+    }
+
+    private void receiveShipment() {
+
+        Waititem result;
+        do {
+            //String name, String manufacturer, String id, BigDecimal price
+
+            String waititemName = getToken("Enter Product name");
+            String manufacturerName = getToken("Enter Manufacturer name");
+            Integer quantity = Integer.parseInt(getToken("Enter the Quantity"));
+            if (warehouse.receiveShipment(manufacturerName, waititemName, quantity)) {
+
+                System.out.println("Shipment Updated");
+            } else {
+                System.out.println("Product could not be added");
+            }
+            if (!yesOrNo("Add more products?")) {
+                break;
+            }
+        } while (true);
+
+    }
+
+    private void recievePayment() {
+        String clientID = getToken("Enter Client ID");
+        Client client = warehouse.makePayment(clientID);
+        System.out.println("Client's total Balance is " + client.balance);
+        Double price = Double.parseDouble(getToken("How much would client like to pay?"));
+        client.balance = client.balance - price;
+        System.out.println("Your new balance is " + client.balance);
+
     }
 
     public void renewProducts() {
@@ -244,6 +263,22 @@ public class UserInterface {
         }
     }
 
+    public void showInvoices() {
+        String clientID = getToken("Enter Client ID");
+        System.out.println(warehouse.showInvoices(clientID));
+        Client client = warehouse.testClient(clientID);
+        System.out.println("The Client's balance is "+ client.balance);
+
+    }
+
+    public void showWaitList() {
+        Iterator allProducts = warehouse.getWaitlist();
+        while (allProducts.hasNext()) {
+            Waititem product = (Waititem) (allProducts.next());
+            System.out.println(product.toString());
+        }
+    }
+
     private void save() {
         if (warehouse.save()) {
             System.out.println(" The warehouse has been successfully saved in the file WarehouseData \n");
@@ -281,23 +316,8 @@ public class UserInterface {
                 case PROCESS_ORDER:
                     issueProducts();
                     break;
-                case RETURN_PRODUCTS:
-                    returnProducts();
-                    break;
-                case REMOVE_PRODUCTS:
-                    removeProducts();
-                    break;
-                case RENEW_PRODUCTS:
-                    renewProducts();
-                    break;
-                case PLACE_HOLD:
-                    placeHold();
-                    break;
-                case REMOVE_HOLD:
-                    removeHold();
-                    break;
-                case PROCESS_HOLD:
-                    processHolds();
+                case RECEIVE_SHIPMENT:
+                    receiveShipment();
                     break;
                 case GET_TRANSACTIONS:
                     getTransactions();
@@ -305,14 +325,20 @@ public class UserInterface {
                 case SAVE:
                     save();
                     break;
-                case RETRIEVE:
-                    retrieve();
-                    break;
                 case SHOW_CLIENTS:
                     showClients();
                     break;
                 case SHOW_PRODUCTS:
                     showProducts();
+                    break;
+                case SHOW_INVOICES:
+                    showInvoices();
+                    break;
+                case SHOW_WAITLIST:
+                    showWaitList();
+                    break;
+                case RECIEVE_PAYMENT:
+                    recievePayment();
                     break;
                 case HELP:
                     help();

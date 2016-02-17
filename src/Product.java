@@ -1,46 +1,58 @@
-package src;
-
 import java.util.*;
 import java.lang.*;
 import java.io.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import java.math.BigDecimal;
+
 public class Product implements Serializable {
-  private static final long serialVersionUID = 1L;
-  private String title;
-  private String author;
-  private String id;
-  protected Client borrower;
-  protected Date dueDate;
-  
 
+    private static final long serialVersionUID = 1L;
+    private String productName;
+    private String manufacturer;
+    private String id;
+    private Double price;
+    protected Integer quantity;
+    protected Client productClient;
+    protected Date soldDate;
 
-  public Product(String title, String author, String id) {
-    this.title = title;
-    this.author = author;
-    this.id = id;
-  }
+    public Product(String name, String manufacturer, String id, Double price, Integer quantity) {
+        this.productName = name;
+        this.manufacturer = manufacturer;
+        this.id = id;
+        this.price = price;
+        this.quantity = quantity;
+    }
 
-  public String getAuthor() {
-    return author;
-  }
-  public String getTitle() {
-    return title;
-  }
-  public String getId() {
-    return id;
-  }
+    public String getProductName() {
+        return productName;
+    }
 
-  public String toString() {
-      return "title " + title + " author " + author + " id " + id;
-  }
-  
-  public Client Borrower(Client Client, Date date){
-  borrower = Client;
-  dueDate = date;
-  return borrower;
-  }
-  
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String toString() {
+        return "Product: " + productName + ", manufacturer: " + manufacturer + ", id: " + id + ", price: " + price +", quantity: "+quantity;
+    }
+
+//    public Client Borrower(Client Client, Date date) {
+//        productClient = Client;
+//        soldDate = date;
+//        return productClient;
+//    }
+//    
+    public void decQuantity(Integer value){
+        quantity= quantity - value;
+        System.out.println("quantity remaining "+ quantity + "\n");
+    }
 
 }
-

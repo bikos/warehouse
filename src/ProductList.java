@@ -1,5 +1,3 @@
-package src;
-
 import java.util.*;
 import java.lang.*;
 import java.io.*;
@@ -74,4 +72,3 @@ public class ProductList implements Serializable {
   
   
 }
-
