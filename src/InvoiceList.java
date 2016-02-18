@@ -55,18 +55,20 @@ public class InvoiceList implements Serializable {
   
   // publish invoices of the clients
   
-  public Invoice checkInvoice(String clientID) {
+  public Iterator checkInvoice(String clientID) {
+        List clList = new LinkedList();
+        clList = null;
         Invoice tempInvoice = null;
         InvoiceList tempInvList = invoiceList.instance();
         Iterator catList = tempInvList.getInvoices();
         while (catList.hasNext()) {
             Invoice invCheck = (Invoice) catList.next();
             if (clientID.equals(invCheck.getclienttId())) {
-                tempInvoice = invCheck;
-                break;
+                clList.add(invCheck.client);
+                
             }
         }
-        return tempInvoice;
+        return clList.iterator();
 
     }
   

@@ -35,7 +35,7 @@
       
 
         public String toString() {
-            return "Waititem: " + product.getProductName() + ", manufacturername: " + product.getManufacturer() + ", quantity: "+quantity + "Order Placed by: "+ client.getName();
+            return "Waititem: " + product.getProductName() + ", manufacturername: " + product.getManufacturer() + ", quantity: "+quantity + " Order Placed by: "+ client.getName();
         }
 
         

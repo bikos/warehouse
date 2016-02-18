@@ -75,36 +75,23 @@ public class Warehouse implements Serializable {
     }
 
     public String showInvoices(String clientID) {
-        //
-        String cat = "";
+
+        String cat = " ";
         InvoiceList testInvoice = InvoiceList.instance();
         Iterator testIterator = testInvoice.getInvoices();
         while (testIterator.hasNext()) {
             Invoice tempTest = (Invoice) testIterator.next();
-            tempTest = testInvoice.checkInvoice(clientID);
-            if (tempTest != null) {
-                cat = cat + (tempTest.getInvoiceString() + "\n");
+            if (clientID.equals(tempTest.client.getId())) {
+                cat = cat + tempTest.getInvoiceString() + "\n";
             }
+
         }
         return cat;
     }
-    
-    public Iterator getWaitlist() {
-    return waitList.getWaititemList();
-    }
 
-//    public String showWailist() {
-//
-//        String cat = "";
-//        WaititemList waitlist = WaititemList.instance();
-//        Iterator testIterator = waitlist.getWaititemList();
-//        while (testIterator.hasNext()) {
-//            Waititem tempTest = (Waititem) testIterator.next();
-//            cat = cat + (tempTest.toString() + "\n");
-//        }
-//        return cat;
-//
-//    }
+    public Iterator getWaitlist() {
+        return waitList.getWaititemList();
+    }
 
     public static Warehouse retrieve() {
         try {
@@ -222,6 +209,7 @@ public class Warehouse implements Serializable {
     public Boolean issueProduct(Client client, String productID, Integer quantity) {
 
         boolean status = FALSE;
+        InvoiceList invoiceListTemp = InvoiceList.instance();
         try {
 
             Product product = ProductList.checkProduct(productID);
@@ -240,17 +228,15 @@ public class Warehouse implements Serializable {
                     Date date = new Date();
                     // issue product and write to the invoice
                     Invoice tempInvoice = new Invoice(product, client, quantity, date);
-                    InvoiceList invoiceList = InvoiceList.instance();
 
-                    if (invoiceList.insertInvoices(tempInvoice)) {
+                    if (invoiceListTemp.insertInvoices(tempInvoice)) {
+
                         System.out.println(tempInvoice.getInvoiceString());
                         product.decQuantity(quantity);
-                        
+
                         //adding to the balance of the client
-                        
                         client.addBalance(tempInvoice.sum);
-                      
-                        
+
                         warehouse.insertTransaction(client, product, date);
 
                     }
@@ -282,7 +268,7 @@ public class Warehouse implements Serializable {
                 Product pdtCheck = (Product) pdtList.next();
                 if (manufacturerName.equals(pdtCheck.getManufacturer()) && productName.equals(pdtCheck.getProductName())) {
                     pdtCheck.quantity += quantity;
-                   // System.out.println("new quantity " + pdtCheck.quantity);
+                    // System.out.println("new quantity " + pdtCheck.quantity);
                     status = TRUE;
                 }
 
@@ -300,8 +286,8 @@ public class Warehouse implements Serializable {
                     InvoiceList invoiceList = InvoiceList.instance();
 
                     if (invoiceList.insertInvoices(tempInvoice)) {
-                        System.out.println("FILLING OUT THE ORDER FOR CLIENT: " + waitCheck.waitClient().getName() +"\n");
-                        System.out.println(tempInvoice.getInvoiceString()+"\n");
+                        System.out.println("FILLING OUT THE ORDER FOR CLIENT: " + waitCheck.waitClient().getName() + "\n");
+                        System.out.println(tempInvoice.getInvoiceString() + "\n");
                         System.out.println("* * * * * * * * * * *");
                         waitCheck.getWaititemName().decQuantity(waitCheck.waitQuantity());
                         waitCheck.waitClient().addBalance(tempInvoice.sum);
@@ -320,14 +306,12 @@ public class Warehouse implements Serializable {
 
         return status;
     }
-    
-   
-    public Client makePayment(String clientID){
-    
-    Client client = warehouse.testClient(clientID);
-    return client;
-        
+
+    public Client makePayment(String clientID) {
+
+        Client client = warehouse.testClient(clientID);
+        return client;
+
     }
-    
 
 }

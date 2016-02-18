@@ -211,7 +211,7 @@ public class UserInterface {
         System.out.println("Client's total Balance is " + client.balance);
         Double price = Double.parseDouble(getToken("How much would client like to pay?"));
         client.balance = client.balance - price;
-        System.out.println("Your new balance is " + client.balance);
+        System.out.println("Client's new balance is " + client.balance);
 
     }
 
@@ -264,12 +264,30 @@ public class UserInterface {
     }
 
     public void showInvoices() {
+//        
+//        Iterator allProducts = warehouse.showInvoices();
+//        while (allProducts.hasNext()) {
+//            Invoice invoice = (Invoice) (allProducts.next());
+//            System.out.println(invoice.getInvoiceString());
+//        }
+//        
+//        
+        
+//        
+        
         String clientID = getToken("Enter Client ID");
+        
+        try {
         System.out.println(warehouse.showInvoices(clientID));
         Client client = warehouse.testClient(clientID);
-        System.out.println("The Client's balance is "+ client.balance);
-
+        System.out.println("The Client's remaining balance is "+ client.balance);
+    
+        } catch (Exception e) {
+        System.out.println("Invalid Input");
+        }
+        
     }
+    
 
     public void showWaitList() {
         Iterator allProducts = warehouse.getWaitlist();
